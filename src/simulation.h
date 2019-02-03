@@ -18,3 +18,6 @@ private:
 	void update_particles();
 
 };
+
+__global__
+void calc_interactions(float4* d_pos, float4* d_vel, float4* d_acc, const int n);

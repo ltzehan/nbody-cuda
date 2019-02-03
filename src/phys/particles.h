@@ -1,17 +1,17 @@
 #pragma once
 
-#include "float3.h"
+#include "float4.h"
 
 // used for organizing property arrays of particles and not meant to be used as a method parameter
-// vectors are stored in float3 which should be able to exploit speedup by coalesced access
+// vectors are stored in float4 which should be able to exploit speedup by coalesced access
 struct Particles {
 
 	// particle position
-	float3* d_pos;
+	float4* d_pos;
 	// particle velocity
-	float3* d_vel;
-	// particle accleration
-	float3* d_acc;
+	float4* d_vel;
+	// particle acceleration
+	float4* d_acc;
 
 	const int n;
 
@@ -20,6 +20,8 @@ struct Particles {
 
 private:
 
-	void init();
+	void init(float4* h_pos, float4* h_vel, float4* h_acc);
+
+	void copy(float4* h_pos, float4* h_vel, float4* h_acc);
 
 };

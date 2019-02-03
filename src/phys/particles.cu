@@ -18,11 +18,21 @@ const float SCALE = 1.0;
 Particles::Particles(const int n) : n(n) {
 
 	// allocate memory to device side variables
-	gpu_check(cudaMalloc((void**)&d_pos, sizeof(float3) * n));
-	gpu_check(cudaMalloc((void**)&d_vel, sizeof(float3) * n));
-	gpu_check(cudaMalloc((void**)&d_acc, sizeof(float3) * n));
+	gpu_check(cudaMalloc((void**)&d_pos, sizeof(float4) * n));
+	gpu_check(cudaMalloc((void**)&d_vel, sizeof(float4) * n));
+	gpu_check(cudaMalloc((void**)&d_acc, sizeof(float4) * n));
 
-	this->init();
+	// temporary host arrays for initialization 
+	float4* h_pos = new float4[n];
+	float4* h_vel = new float4[n];
+	float4* h_acc = new float4[n];
+
+	this->init(h_pos, h_vel, h_acc);
+	this->copy(h_pos, h_vel, h_acc);
+
+	delete[] h_pos;
+	delete[] h_vel;
+	delete[] h_acc;
 
 }
 
@@ -34,14 +44,18 @@ Particles::~Particles() {
 
 }
 
+// copy particle properties from host to device
+void Particles::copy(float4* h_pos, float4* h_vel, float4* h_acc) {
+
+	gpu_check(cudaMemcpy(d_pos, h_pos, sizeof(float4) * n, cudaMemcpyHostToDevice));
+	gpu_check(cudaMemcpy(d_vel, h_vel, sizeof(float4) * n, cudaMemcpyHostToDevice));
+	gpu_check(cudaMemcpy(d_acc, h_acc, sizeof(float4) * n, cudaMemcpyHostToDevice));
+
+}
+
 // initialize particle positions using Plummer model
 // will include other cluster models in the future
-void Particles::init() {
-
-	// temporary host arrays for initialization 
-	float3* h_pos = new float3[n];
-	float3* h_vel = new float3[n];
-	float3* h_acc = new float3[n];
+void Particles::init(float4* h_pos, float4* h_vel, float4* h_acc) {
 
 	using dstr = std::uniform_real_distribution<float>;
 
@@ -55,7 +69,6 @@ void Particles::init() {
 	std::random_device rd;
 	std::mt19937 rng(rd());
 
-	// using Plummer model for particles
 	for (int i = 0; i < n; i++) {
 
 		// radial distance
@@ -65,7 +78,7 @@ void Particles::init() {
 		float elv = acos(elevation(rng)) - M_PI_2;
 
 		// populate position host vectors
-		h_pos[i] = make_float3(
+		h_pos[i] = make_float4(
 			r * cos(elv) * cos(azi),
 			r * cos(elv) * sin(azi),
 			r * sin(elv)
@@ -88,28 +101,15 @@ void Particles::init() {
 		elv = acos(elevation(rng)) - M_PI_2;
 
 		// populate velocity host vectors
-		h_vel[i] = make_float3(
+		h_vel[i] = make_float4(
 			v * cos(elv) * cos(azi),
 			v * cos(elv) * sin(azi),
 			v * sin(elv)
 		);
 
 		// populate acceleration host vectors
-		h_acc[i] = make_float3(
-			0.0,
-			0.0,
-			0.0
-		);
+		h_acc[i] = make_float4(0, 0, 0);
 
 	}
-
-	// copy properties to device side
-	gpu_check(cudaMemcpy(d_pos, h_pos, sizeof(float3) * n, cudaMemcpyHostToDevice));
-	gpu_check(cudaMemcpy(d_vel, h_vel, sizeof(float3) * n, cudaMemcpyHostToDevice));
-	gpu_check(cudaMemcpy(d_acc, h_acc, sizeof(float3) * n, cudaMemcpyHostToDevice));
-
-	delete[] h_pos;
-	delete[] h_vel;
-	delete[] h_acc;
 
 }

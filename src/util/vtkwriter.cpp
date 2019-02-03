@@ -46,11 +46,11 @@ VTKWriter::VTKWriter(bool del_old_dirs) {
 }
 
 // write particle positions to file
-void VTKWriter::write_pos(const float3* d_pos, const int n) {
+void VTKWriter::write_pos(const float4* d_pos, const int n) {
 
 	// copy positions to host side
-	float3* h_pos = new float3[n];
-	gpu_check(cudaMemcpy(h_pos, d_pos, sizeof(float3) * n, cudaMemcpyDeviceToHost));
+	float4* h_pos = new float4[n];
+	gpu_check(cudaMemcpy(h_pos, d_pos, sizeof(float4) * n, cudaMemcpyDeviceToHost));
 
 	fs::path file = outdir / ("frame-" + std::to_string(frame) + ".vtk");
 
@@ -65,9 +65,9 @@ void VTKWriter::write_pos(const float3* d_pos, const int n) {
 	// write particle positions
 	for (int i = 0; i < n; i++) {
 		
-		float3 pos = h_pos[i];
+		float4 pos = h_pos[i];
 
-		ofs << pos.x << " " << pos.y << " " << pos.x << "\n";
+		ofs << pos.x << " " << pos.y << " " << pos.z << "\n";
 
 	}
 

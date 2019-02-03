@@ -5,13 +5,14 @@
 #include <chrono>
 #include <iostream>
 #include <iomanip>
+#include "debug.h"
 #include "config.h"
 #include "simulation.h"
 #include "vtkwriter.h"
 
-#define ENABLE_GPU_CHECK
-
 int main() {
+
+	print_dev_prop();
 
 	using Clock = std::chrono::high_resolution_clock;
 	using time_ms = std::chrono::milliseconds;
