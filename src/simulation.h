@@ -19,5 +19,11 @@ private:
 
 };
 
+__device__
+float4 calc_acc(const float4 pos_i, const float4 pos_j, float4 acc);
+
+__device__
+float4 update_acc(const float4* d_pos, const int n);
+
 __global__
-void calc_interactions(float4* d_pos, float4* d_vel, float4* d_acc, const int n);
+void update_kernel(float4* d_pos, float4* d_vel, float4* d_acc, const int n);

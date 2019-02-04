@@ -30,10 +30,6 @@ Particles::Particles(const int n) : n(n) {
 	this->init(h_pos, h_vel, h_acc);
 	this->copy(h_pos, h_vel, h_acc);
 
-	delete[] h_pos;
-	delete[] h_vel;
-	delete[] h_acc;
-
 }
 
 Particles::~Particles() {
@@ -50,6 +46,10 @@ void Particles::copy(float4* h_pos, float4* h_vel, float4* h_acc) {
 	gpu_check(cudaMemcpy(d_pos, h_pos, sizeof(float4) * n, cudaMemcpyHostToDevice));
 	gpu_check(cudaMemcpy(d_vel, h_vel, sizeof(float4) * n, cudaMemcpyHostToDevice));
 	gpu_check(cudaMemcpy(d_acc, h_acc, sizeof(float4) * n, cudaMemcpyHostToDevice));
+
+	delete[] h_pos;
+	delete[] h_vel;
+	delete[] h_acc;
 
 }
 

@@ -5,6 +5,7 @@
 
 #include <cuda_runtime.h>
 #include <device_launch_parameters.h>
+#include "debug.h"
 #include "simulation.h"
 #include "vtkwriter.h"
 
@@ -29,13 +30,18 @@ Simulation::~Simulation() {
 void Simulation::start() {
 
 	VTKWriter vtkw;
-	
+
 	for (int i = 0; i < config.frames; i++) {
 		
 		//update_particles();
 
-		vtkw.write_pos(pt->d_pos, config.n);
+		// copy positions to host side
+		float4* h_pos = new float4[config.n];
+		gpu_check(cudaMemcpy(h_pos, pt->d_pos, sizeof(float4) * config.n, cudaMemcpyDeviceToHost));
 
+		vtkw.write_pos(h_pos, config.n);
+
+		delete[] h_pos;
 	}
 
 }
@@ -45,13 +51,17 @@ void Simulation::update_particles() {
 	
 	int grid_size = (config.n + BLOCK_SIZE - 1) / BLOCK_SIZE;
 
-	calc_interactions<<<grid_size, BLOCK_SIZE>>>(pt->d_pos, pt->d_vel, pt->d_acc, config.n);
+	update_kernel<<<grid_size, BLOCK_SIZE>>>(pt->d_pos, pt->d_vel, pt->d_acc, config.n);
+	gpu_check(cudaPeekAtLastError());
+
+	// wait for kernels to finish
+	gpu_check(cudaDeviceSynchronize());
 
 }
 
-// calculates change in acceleration due to gravity
+// calculates accleration vector from forces
 __device__
-void calc_acc(float4 pos_i, float4 pos_j, float4& acc) {
+float4 calc_acc(const float4 pos_i, const float4 pos_j, float4 acc) {
 
 	float3 r = {
 		pos_j.x - pos_i.x,
@@ -67,12 +77,16 @@ void calc_acc(float4 pos_i, float4 pos_j, float4& acc) {
 	acc.y += r.y * inv_distcb;
 	acc.z += r.z * inv_distcb;
 
+	return acc;
+
 }
 
-__global__
-void calc_interactions(float4* d_pos, float4* d_vel, float4* d_acc, const int n) {
+// particle positions per thread tile in 
+extern __shared__ float4 s_pos[BLOCK_SIZE];
 
-	extern __shared__ float4 s_pos[];
+// calculates updated acceleration vector
+__device__
+float4 update_acc(const float4* d_pos, const int n) {
 
 	int id = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -91,8 +105,8 @@ void calc_interactions(float4* d_pos, float4* d_vel, float4* d_acc, const int n)
 		__syncthreads();
 
 		// update current body's accleration with next tile of bodies
-		for (int i = 0; i < blockDim.x; i++) {
-			calc_acc(pos, s_pos[i], acc);
+		for (int j = 0; j < blockDim.x; j++) {
+			acc = calc_acc(pos, s_pos[j], acc);
 		}
 		__syncthreads();
 
@@ -100,6 +114,48 @@ void calc_interactions(float4* d_pos, float4* d_vel, float4* d_acc, const int n)
 
 	}
 
+	return acc;
+
+}
+
+// updates particle properties
+__global__
+void update_kernel(float4* d_pos, float4* d_vel, float4* d_acc, const int n) {
+
+	int id = blockIdx.x * blockDim.x + threadIdx.x;
+
+	float4 pos = d_pos[id];
+	float4 vel = d_vel[id];
+	float4 acc = d_acc[id];
+
+	// using kick-drift-kick leapfrog integrator
+	float t_2 = TIME_STEP / 2;
+
+	// velocity at mid-point of time step
+	float4 vel_mid = make_float4(
+		vel.x + acc.x * t_2,
+		vel.y + acc.y * t_2,
+		vel.z + acc.z * t_2
+	);
+
+	// update position
+	d_pos[id] = make_float4(
+		pos.x + vel_mid.x * TIME_STEP,
+		pos.y + vel_mid.y * TIME_STEP,
+		pos.z + vel_mid.z * TIME_STEP
+	);
+
+	// calculate new accleration
+	acc = update_acc(d_pos, n);
+
+	// update velocity
+	d_vel[id] = make_float4(
+		vel_mid.x + acc.x * t_2,
+		vel_mid.y + acc.y * t_2,
+		vel_mid.z + acc.z * t_2
+	);
+
+	// update accleration
 	d_acc[id] = acc;
 
 }

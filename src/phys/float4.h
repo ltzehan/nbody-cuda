@@ -11,6 +11,10 @@
 // overload for built-in make_float4
 __device__ __host__
 inline float4 make_float4(float x, float y, float z) {
-	float4 f = { x, y, z, 0 };
+	float4 f;
+	f.x = x;
+	f.y = y;
+	f.z = z;
+
 	return f;
 }

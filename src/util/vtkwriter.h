@@ -7,7 +7,7 @@ struct VTKWriter {
 
 	VTKWriter(bool del_old_dirs = true);
 
-	void write_pos(const float4* d_pos, const int n);
+	void write_pos(const float4* h_pos, const int n);
 
 private:
 
