@@ -18,8 +18,6 @@ Simulation::Simulation(const Config& config) : config(config) {
 	// initialize particles
 	pt = new Particles(config.n);
 
-	this->start();
-
 }
 
 Simulation::~Simulation() {
@@ -30,19 +28,20 @@ Simulation::~Simulation() {
 void Simulation::start() {
 
 	VTKWriter vtkw;
+	float4* h_pos = new float4[config.n];
 
 	for (int i = 0; i < config.frames; i++) {
 		
-		//update_particles();
+		update_particles();
 
 		// copy positions to host side
-		float4* h_pos = new float4[config.n];
 		gpu_check(cudaMemcpy(h_pos, pt->d_pos, sizeof(float4) * config.n, cudaMemcpyDeviceToHost));
 
 		vtkw.write_pos(h_pos, config.n);
 
-		delete[] h_pos;
 	}
+
+	delete[] h_pos;
 
 }
 
@@ -70,7 +69,7 @@ float4 calc_acc(const float4 pos_i, const float4 pos_j, float4 acc) {
 	};
 	
 	// using softening parameter
-	float dist = r.x * r.x + r.y * r.y * r.z * r.z + SOFTENING;
+	float dist = r.x * r.x + r.y * r.y + r.z * r.z + SOFTENING;
 	float inv_distcb = 1.0f / sqrtf(dist * dist * dist);
 
 	acc.x += r.x * inv_distcb;

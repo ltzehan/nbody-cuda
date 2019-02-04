@@ -75,13 +75,13 @@ void Particles::init(float4* h_pos, float4* h_vel, float4* h_acc) {
 		float r = SCALE / sqrt(pow(mass_ratio(rng), -0.666666) - 1);
 		// spherical coordinates
 		float azi = azimuth(rng);
-		float elv = acos(elevation(rng)) - M_PI_2;
+		float elv = acos(elevation(rng));
 
 		// populate position host vectors
 		h_pos[i] = make_float4(
-			r * cos(elv) * cos(azi),
-			r * cos(elv) * sin(azi),
-			r * sin(elv)
+			r * sin(elv) * cos(azi),
+			r * sin(elv) * sin(azi),
+			r * cos(elv)
 		);
 
 		// rejection sampling for velocities
@@ -98,13 +98,13 @@ void Particles::init(float4* h_pos, float4* h_vel, float4* h_acc) {
 		float v = q * M_SQRT2 * pow(1.0 + r * r, -0.25);
 		// spherical coordinates
 		azi = azimuth(rng);
-		elv = acos(elevation(rng)) - M_PI_2;
+		elv = acos(elevation(rng));
 
 		// populate velocity host vectors
 		h_vel[i] = make_float4(
-			v * cos(elv) * cos(azi),
-			v * cos(elv) * sin(azi),
-			v * sin(elv)
+			v * sin(elv) * cos(azi),
+			v * sin(elv) * sin(azi),
+			v * cos(elv)
 		);
 
 		// populate acceleration host vectors

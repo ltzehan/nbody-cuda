@@ -15,6 +15,7 @@ inline float4 make_float4(float x, float y, float z) {
 	f.x = x;
 	f.y = y;
 	f.z = z;
+	f.w = 0;
 
 	return f;
 }
