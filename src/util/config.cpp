@@ -156,7 +156,7 @@ void Config::create(fs::path p) {
 	std::ofstream ofs(p);
 	ofs << "# Configuration file for nbody\n"
 		<< "# Parameters are set using key-value pairs\n"
-		<< "# Default values will be used if not explicitly specified"
+		<< "# Default values will be used if not explicitly specified\n"
 		<< "\n"
 		<< "# Number of bodies\n"
 		<< "N=" << DEFAULT_N << "\n"
