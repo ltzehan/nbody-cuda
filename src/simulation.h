@@ -1,6 +1,7 @@
 #pragma once
 
 #include "config.h"
+#include "glhandler.h"
 #include "particles.h"
 
 struct Simulation {
@@ -13,6 +14,8 @@ struct Simulation {
 private:
 
 	const Config config;
+	GLHandler* glhandler;
+
 	Particles* pt;
 
 	void update_particles();

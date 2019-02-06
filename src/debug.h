@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdio>
+#include <stdlib.h>
 #include <cuda_runtime.h>
 
 #define ENABLE_GPU_CHECK
@@ -11,6 +12,7 @@
 #define gpu_check(ans) (ans)
 #endif
 
+// check CUDA function calls for errors
 inline void gpu_assert(cudaError_t code, const char *file, int line, bool abort = true) {
 	
 	if (code != cudaSuccess) {
@@ -21,6 +23,13 @@ inline void gpu_assert(cudaError_t code, const char *file, int line, bool abort 
 			exit(code);
 		}
 	}
+
+}
+
+// callback function for GLFW errors
+inline void glfw_error(int err, const char* desc) {
+
+	fprintf(stderr, "glfw_error: %s\n", desc);
 
 }
 

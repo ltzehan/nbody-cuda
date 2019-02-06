@@ -1,10 +1,11 @@
 //
 //	Manages control flow of the simulation
-//	Will also manage OpenGL visualization when implemented
 //
 
 #include <cuda_runtime.h>
 #include <device_launch_parameters.h>
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
 #include "debug.h"
 #include "simulation.h"
 #include "vtkwriter.h"
@@ -17,6 +18,9 @@ Simulation::Simulation(const Config& config) : config(config) {
 	
 	// initialize particles
 	pt = new Particles(config.n);
+
+	// initialize display handler
+	glhandler = new GLHandler();
 
 }
 
