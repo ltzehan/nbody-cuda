@@ -2,7 +2,7 @@
 
 #include "float4.h"
 
-// used for organizing property arrays of particles and not meant to be used as a method parameter
+// used for organizing property arrays of particles and not meant to be used as a function parameter
 // vectors are stored in float4 which should be able to exploit speedup by coalesced access
 struct Particles {
 

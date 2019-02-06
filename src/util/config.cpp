@@ -22,7 +22,7 @@ const std::string CONFIG_KEY_FRAMES = "FRAMES";
 // file name
 const std::string CONFIG_FILE = "nbody.cfg";
 
-// methods for input validation
+// functions for input validation
 namespace {
 
 	// removes whitespace from string
@@ -34,9 +34,9 @@ namespace {
 	}
 
 	// called when parsing encounters error
-	void print_parse_err(std::string err, std::string key = "") { 
-		std::cout << "Error when parsing configuration file:\n" 
-			<< err << " " << key << std::endl; 
+	void print_parse_err(std::string err, std::string key = "") {
+		std::cout << "Error when parsing configuration file:\n"
+			<< err << " " << key << std::endl;
 	}
 
 	// assigns value to reference passed if the given string represents
@@ -62,7 +62,7 @@ namespace {
 	}
 	// associated error
 	void print_not_posnz_int(std::string key) {
-		print_parse_err("Expected positive non-zero integer for key", key); 
+		print_parse_err("Expected positive non-zero integer for key", key);
 	}
 
 	void print_unrecog_key(std::string key) {
@@ -100,7 +100,7 @@ bool Config::load() {
 
 			// ignore comments and blank lines
 			if (line.size() > 0 && line.at(0) != CONFIG_COMMENT) {
-				
+
 				remove_whitespace(line);
 
 				// position of delimiter
@@ -147,7 +147,7 @@ void Config::print() {
 		<< std::setw(8) << "N" << " = " << this->n << "\n"
 		<< std::setw(8) << "FRAMES" << " = " << this->frames << "\n"
 		<< std::endl;
-	 
+
 }
 
 // create new configuration file and populate with default parameters
