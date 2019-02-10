@@ -10,16 +10,20 @@
 #include "simulation.h"
 #include "vtkwriter.h"
 
+// temp. control for VTK_Writer
+// #define USE_VTK
+
 int main() {
 
 	print_dev_prop();
 
-	using Clock = std::chrono::high_resolution_clock;
-	using time_ms = std::chrono::milliseconds;
-
 	// load configuration
 	Config config;
 	config.load();
+
+#ifdef USE_VTK
+	using Clock = std::chrono::high_resolution_clock;
+	using time_ms = std::chrono::milliseconds;
 
 	// calculates elapsed time in seconds
 	auto get_elapsed = [](auto start, auto end) {
@@ -31,12 +35,13 @@ int main() {
 
 	// simulation start time
 	auto start_time = Clock::now();
-	
+#endif
+
 	std::cout << "Simulation started" << std::endl;
 
 	Simulation sim(config);
-	sim.start();
 
+#ifdef USE_VTK
 	// simulation end time
 	auto end_time = Clock::now();
 	
@@ -45,6 +50,7 @@ int main() {
 		<< config.frames << " frames in " << elapsed_time
 		<< "; FPS = " << (config.frames / elapsed_time) << "]"
 		<< std::endl;
+#endif
 
 	getchar();
 	return 0;

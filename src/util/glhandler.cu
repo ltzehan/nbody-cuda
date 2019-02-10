@@ -4,12 +4,14 @@
 
 #include "glhandler.h"
 #include "debug.h"
+#include "simulation.h"
 
 // tentative definitions
 #define GRPH_WIN_W 640
 #define GRPH_WIN_H 480
 
-GLHandler::GLHandler() {
+// argument is a function pointer to advance simulation to the next frame
+GLHandler::GLHandler(Simulation* sim) {
 
 	// initialize GLFW
 	if (!glfwInit()) {
@@ -26,13 +28,11 @@ GLHandler::GLHandler() {
 		if (!window) {
 			// failed
 			glfw_error(-1, "Failed to create window");
+			glfwTerminate();
 
 		}
 
 		glfwMakeContextCurrent(window);
-
-		// set key action callback function
-		glfwSetKeyCallback(window, keys_callback);
 
 		// intialize GLEW
 		GLenum err = glewInit();
@@ -42,14 +42,36 @@ GLHandler::GLHandler() {
 
 		}
 
+		glfwHideWindow(window);
+
+		// set key action callback function
+		glfwSetKeyCallback(window, keys_callback);
+
 	}
 
 }
 
 GLHandler::~GLHandler() {
 
-	glfwDestroyWindow(window);
 	glfwTerminate();
+
+}
+
+// display loop
+void GLHandler::loop() {
+
+	// make window visible
+	glfwShowWindow(window);
+	glfwFocusWindow(window);
+
+	while (!glfwWindowShouldClose(window)) {
+
+		glfwPollEvents();
+		glfwSwapBuffers(window);
+
+	}
+
+	glfwDestroyWindow(window);
 
 }
 
@@ -58,7 +80,7 @@ void GLHandler::keys_callback(GLFWwindow* window, int key, int scancode, int act
 
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
 		// this is bad and should be fixed somewhere else
-		glfwDestroyWindow(window);
+		glfwSetWindowShouldClose(window, true);
 	}
 
 }

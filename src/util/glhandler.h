@@ -5,10 +5,14 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
+struct Simulation;
+
 struct GLHandler {
 
-	GLHandler();
+	GLHandler(Simulation* sim);
 	~GLHandler();
+
+	void loop();
 
 private:
 

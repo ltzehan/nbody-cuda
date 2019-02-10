@@ -2,22 +2,26 @@
 
 #include "config.h"
 #include "glhandler.h"
+#include "vtkwriter.h"
 #include "particles.h"
 
 struct Simulation {
 
 	Simulation(const Config& config);
 	~Simulation();
-
-	void start();
 	
+	void next_frame();
+
 private:
 
 	const Config config;
 	GLHandler* glhandler;
+	VTKWriter* vtkwriter;
+	float4* vtk_pos;
 
 	Particles* pt;
 
+	void write_pos();
 	void update_particles();
 
 };

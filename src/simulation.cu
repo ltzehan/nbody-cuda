@@ -8,7 +8,6 @@
 #include <GLFW/glfw3.h>
 #include "debug.h"
 #include "simulation.h"
-#include "vtkwriter.h"
 
 #define BLOCK_SIZE 256
 #define SOFTENING 1E-9f
@@ -20,32 +19,45 @@ Simulation::Simulation(const Config& config) : config(config) {
 	pt = new Particles(config.n);
 
 	// initialize display handler
-	glhandler = new GLHandler();
+	glhandler = new GLHandler(this);
+
+	// initialize VTK output writer if necessary
+	vtkwriter = new VTKWriter();
+	
+	// initialize host side array for positions
+	vtk_pos = new float4[config.n];
+
+	// start simulation through display handler
+	glhandler->loop();
 
 }
 
 Simulation::~Simulation() {
+	
 	delete pt;
+	delete glhandler;
+	delete vtkwriter;
+	delete vtk_pos;
+
 }
 
-// control loop
-void Simulation::start() {
+// advance simulation to next frame
+// should only be called through function pointer
+void Simulation::next_frame() {
 
-	VTKWriter vtkw;
-	float4* h_pos = new float4[config.n];
+	update_particles();
+	write_pos();
 
-	for (int i = 0; i < config.frames; i++) {
-		
-		update_particles();
+}
 
-		// copy positions to host side
-		gpu_check(cudaMemcpy(h_pos, pt->d_pos, sizeof(float4) * config.n, cudaMemcpyDeviceToHost));
+// output particle positions to .vtk file
+void Simulation::write_pos() {
 
-		vtkw.write_pos(h_pos, config.n);
-
-	}
-
-	delete[] h_pos;
+#ifdef USE_VTK
+	// copy positions to host side
+	gpu_check(cudaMemcpy(vtk_pos, pt->d_pos, sizeof(float4) * config.n, cudaMemcpyDeviceToHost));
+	vtkwriter->write_pos(vtk_pos, config.n);
+#endif
 
 }
 
