@@ -1,7 +1,6 @@
 #pragma once
 
 #include "config.h"
-#include "glhandler.h"
 #include "vtkwriter.h"
 #include "particles.h"
 
@@ -15,7 +14,6 @@ struct Simulation {
 private:
 
 	const Config config;
-	GLHandler* glhandler;
 	VTKWriter* vtkwriter;
 	float4* vtk_pos;
 

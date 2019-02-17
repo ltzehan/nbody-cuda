@@ -16,8 +16,11 @@ struct GLHandler {
 
 private:
 
+	Simulation* sim;
+
 	GLFWwindow* window;
 
 	static void keys_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
+	static void resize_callback(GLFWwindow* window, int width, int height);
 
 };

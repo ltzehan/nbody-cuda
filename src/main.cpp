@@ -9,6 +9,7 @@
 #include "config.h"
 #include "simulation.h"
 #include "vtkwriter.h"
+#include "glhandler.h"
 
 // temp. control for VTK_Writer
 // #define USE_VTK
@@ -40,6 +41,10 @@ int main() {
 	std::cout << "Simulation started" << std::endl;
 
 	Simulation sim(config);
+	GLHandler glhandler(&sim);
+
+	// start simulation through graphics handler
+	glhandler.loop();
 
 #ifdef USE_VTK
 	// simulation end time

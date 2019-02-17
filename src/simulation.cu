@@ -18,24 +18,17 @@ Simulation::Simulation(const Config& config) : config(config) {
 	// initialize particles
 	pt = new Particles(config.n);
 
-	// initialize display handler
-	glhandler = new GLHandler(this);
-
 	// initialize VTK output writer if necessary
 	vtkwriter = new VTKWriter();
 	
 	// initialize host side array for positions
 	vtk_pos = new float4[config.n];
 
-	// start simulation through display handler
-	glhandler->loop();
-
 }
 
 Simulation::~Simulation() {
 	
 	delete pt;
-	delete glhandler;
 	delete vtkwriter;
 	delete vtk_pos;
 

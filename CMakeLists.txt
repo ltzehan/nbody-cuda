@@ -34,4 +34,4 @@ file (GLOB_RECURSE src_files
 # Executable for simulation
 add_executable (nbody ${src_files})
 target_include_directories (nbody PRIVATE ${include_dirs})
-target_link_libraries (nbody PRIVATE ${GLEW_LIBRARY}\\glew32s.lib ${GLFW_LIBRARY}\\glfw3.lib opengl32.lib)
+target_link_libraries (nbody PRIVATE ${GLEW_LIBRARY}\\glew32s.lib ${GLFW_LIBRARY}\\glfw3.lib opengl32.lib glu32.lib)
